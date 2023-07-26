@@ -9,23 +9,41 @@ const DEFAULT_LONG_PAUSE: Option<Duration> = Some(Duration::from_secs(15 * 60));
 #[derive(Parser, Debug)]
 #[command(author, version, about = "Yet another pomodoro timer")]
 pub struct Args {
-    #[arg(short, long, value_parser = from_minutes_str, help = "single session duration in minutes (default: 30)")]
-    pub session: Option<Duration>,
+    #[arg(short, long, value_parser = Self::from_minutes_str, help = "single session duration in minutes (default: 30)")]
+    session: Option<Duration>,
 
-    #[arg(short, long, value_parser = from_minutes_str, help = "pause duration between sessions, in minutes (default: 5)")]
-    pub pause: Option<Duration>,
+    #[arg(short, long, value_parser = Self::from_minutes_str, help = "pause duration between sessions, in minutes (default: 5)")]
+    pause: Option<Duration>,
 
     #[arg(short, long, help = "round (subsequent sessions) count (default: 4)")]
-    pub round: Option<u32>,
+    round: Option<u32>,
 
-    #[arg(short, long, value_parser = from_minutes_str, help = "pause duration between rounds, in minutes (default: 15)")]
-    pub long_pause: Option<Duration>,
+    #[arg(short, long, value_parser = Self::from_minutes_str, help = "pause duration between rounds, in minutes (default: 15)")]
+    long_pause: Option<Duration>,
 }
 
-fn from_minutes_str(s: &str) -> Result<Duration, std::num::ParseIntError> {
-    let minutes: u64 = s.parse()?;
+impl Args {
+    fn from_minutes_str(s: &str) -> Result<Duration, std::num::ParseIntError> {
+        let minutes: u64 = s.parse()?;
 
-    Ok(Duration::from_secs(minutes * 60))
+        Ok(Duration::from_secs(minutes * 60))
+    }
+
+    pub fn session(&self) -> Duration {
+        self.session.unwrap()
+    }
+
+    pub fn pause(&self) -> Duration {
+        self.pause.unwrap()
+    }
+
+    pub fn round(&self) -> u32 {
+        self.round.unwrap()
+    }
+
+    pub fn long_pause(&self) -> Duration {
+        self.long_pause.unwrap()
+    }
 }
 
 pub fn parse_args() -> Args {
