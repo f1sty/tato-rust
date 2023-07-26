@@ -7,7 +7,7 @@ use std::time::Duration;
 #[derive(Parser, Debug)]
 #[command(author, version, about = "Yet another pomodoro timer")]
 pub struct Args {
-    #[arg(short = 'd', long, value_parser = Self::from_minutes_str, help = "single block duration in minutes (default: 30)")]
+    #[arg(short = 'd', long, value_parser = Self::from_minutes_str, help = "single block duration in minutes (default: 35)")]
     block_duration: Option<Duration>,
 
     #[arg(short, long, value_parser = Self::from_minutes_str, help = "break duration between blocks in minutes (default: 5)")]
@@ -19,7 +19,7 @@ pub struct Args {
     #[arg(
         short,
         long,
-        help = "how much blocks to do before long break (default: 4)"
+        help = "how much blocks to do before long break (default: 3)"
     )]
     iterations: Option<u32>,
 
@@ -81,9 +81,9 @@ impl Args {
 }
 
 pub fn parse_args() -> Args {
-    let default_block_duration: Option<Duration> = Some(Duration::from_secs(30 * 60));
+    let default_block_duration: Option<Duration> = Some(Duration::from_secs(35 * 60));
     let default_break_duration: Option<Duration> = Some(Duration::from_secs(5 * 60));
-    let default_iterations: Option<u32> = Some(4);
+    let default_iterations: Option<u32> = Some(3);
     let default_long_break_duration: Option<Duration> = Some(Duration::from_secs(15 * 60));
     let default_player: Option<PathBuf> = Some(PathBuf::from("mpv"));
 
