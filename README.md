@@ -4,7 +4,7 @@ Yet another **pomodoro** timer CLI tool.
 
 # Help
 
-```bash
+```
 Usage: tato [OPTIONS]
 
 Options:
