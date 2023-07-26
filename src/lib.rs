@@ -1,6 +1,11 @@
 use clap::Parser;
 use std::time::Duration;
 
+const DEFAULT_SESSION: Option<Duration> = Some(Duration::from_secs(30 * 60));
+const DEFAULT_PAUSE: Option<Duration> = Some(Duration::from_secs(5 * 60));
+const DEFAULT_ROUND: Option<u32> = Some(4);
+const DEFAULT_LONG_PAUSE: Option<Duration> = Some(Duration::from_secs(15 * 60));
+
 #[derive(Parser, Debug)]
 #[command(author, version, about = "Yet another pomodoro timer")]
 pub struct Args {
@@ -24,5 +29,10 @@ fn from_minutes_str(s: &str) -> Result<Duration, std::num::ParseIntError> {
 }
 
 pub fn parse_args() -> Args {
-    Args::parse()
+    let mut args = Args::parse();
+    args.session = args.session.or(DEFAULT_SESSION);
+    args.pause = args.pause.or(DEFAULT_PAUSE);
+    args.round = args.round.or(DEFAULT_ROUND);
+    args.long_pause = args.long_pause.or(DEFAULT_LONG_PAUSE);
+    args
 }
