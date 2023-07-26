@@ -9,13 +9,13 @@ Usage: tato [OPTIONS]
 
 Options:
   -d, --block-duration <BLOCK_DURATION>
-          single block duration in minutes (default: 30)
+          single block duration in minutes (default: 35)
   -b, --break-duration <BREAK_DURATION>
           break duration between blocks in minutes (default: 5)
   -l, --long-break-duration <LONG_BREAK_DURATION>
           long break duration in minutes (default: 15)
   -i, --iterations <ITERATIONS>
-          how much blocks to do before long break (default: 4)
+          how much blocks to do before long break (default: 3)
   -p, --player <PLAYER>
           media-player to use to play sounds (default: 'mpv')
   -s, --break-sound <BREAK_SOUND>
