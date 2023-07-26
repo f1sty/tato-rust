@@ -6,21 +6,24 @@ pub fn main() {
     let mut rounds_count = 0;
 
     loop {
-        println!("session starting ->");
         thread::sleep(args.session());
-        println!("session ended    <-");
 
         rounds_count += 1;
 
+        println!("==> finished session: {rounds_count}");
         if rounds_count == args.round() {
-            println!("long pause starting ->");
+            play_long_pause_sound(&args);
+            println!("==> long pause started");
             thread::sleep(args.long_pause());
-            println!("long pause ended    <-");
+            play_long_pause_sound(&args);
+            println!("==> long pause ended");
             rounds_count = 0;
         } else {
-            println!("pause starting ->");
+            play_pause_sound(&args);
+            println!("==> pause started");
             thread::sleep(args.pause());
-            println!("pause ended    <-");
+            play_pause_sound(&args);
+            println!("==> pause ended");
         }
     }
 }
