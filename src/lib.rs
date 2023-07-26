@@ -31,7 +31,7 @@ pub struct Args {
     #[arg(
         short,
         long,
-        help = "long pause sound file path (default: 'sound/long_ding.mp3')"
+        help = "long pause sound file path (default: 'sounds/long_ding.mp3')"
     )]
     long_pause_sound: Option<PathBuf>,
 }
