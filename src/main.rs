@@ -3,27 +3,28 @@ use tato::*;
 
 pub fn main() {
     let args = parse_args();
-    let mut rounds_count = 0;
+    let mut iteration = 1;
 
     loop {
-        thread::sleep(args.session());
+        println!("==> started block: {iteration}");
+        thread::sleep(args.block_duration());
 
-        rounds_count += 1;
-
-        println!("==> finished session: {rounds_count}");
-        if rounds_count == args.round() {
-            play_long_pause_sound(&args);
-            println!("==> long pause started");
-            thread::sleep(args.long_pause());
-            play_long_pause_sound(&args);
-            println!("==> long pause ended");
-            rounds_count = 0;
+        println!("==> finished block: {iteration}");
+        if iteration == args.iterations() {
+            play_long_break_sound(&args);
+            println!("==> long break started");
+            thread::sleep(args.long_break_duration());
+            play_long_break_sound(&args);
+            println!("==> long break ended");
+            iteration = 0;
         } else {
-            play_pause_sound(&args);
-            println!("==> pause started");
-            thread::sleep(args.pause());
-            play_pause_sound(&args);
-            println!("==> pause ended");
+            play_break_sound(&args);
+            println!("==> break started");
+            thread::sleep(args.break_duration());
+            play_break_sound(&args);
+            println!("==> break ended");
         }
+
+        iteration += 1;
     }
 }

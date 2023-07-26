@@ -1,4 +1,5 @@
 use clap::Parser;
+use std::env;
 use std::path::PathBuf;
 use std::process::Command;
 use std::time::Duration;
@@ -6,34 +7,42 @@ use std::time::Duration;
 #[derive(Parser, Debug)]
 #[command(author, version, about = "Yet another pomodoro timer")]
 pub struct Args {
-    #[arg(long, value_parser = Self::from_minutes_str, help = "single session duration in minutes (default: 30)")]
-    session: Option<Duration>,
+    #[arg(short = 'd', long, value_parser = Self::from_minutes_str, help = "single block duration in minutes (default: 30)")]
+    block_duration: Option<Duration>,
 
-    #[arg(long, value_parser = Self::from_minutes_str, help = "pause duration between sessions, in minutes (default: 5)")]
-    pause: Option<Duration>,
+    #[arg(short, long, value_parser = Self::from_minutes_str, help = "break duration between blocks in minutes (default: 5)")]
+    break_duration: Option<Duration>,
 
-    #[arg(long, help = "round (subsequent sessions) count (default: 4)")]
-    round: Option<u32>,
+    #[arg(short, long, value_parser = Self::from_minutes_str, help = "long break duration in minutes (default: 15)")]
+    long_break_duration: Option<Duration>,
 
-    #[arg(long, value_parser = Self::from_minutes_str, help = "pause duration between rounds, in minutes (default: 15)")]
-    long_pause: Option<Duration>,
+    #[arg(
+        short,
+        long,
+        help = "how much blocks to do before long break (default: 4)"
+    )]
+    iterations: Option<u32>,
 
-    #[arg(long, help = "media-player used to play sounds (default: 'mpv')")]
+    #[arg(
+        short,
+        long,
+        help = "media-player to use to play sounds (default: 'mpv')"
+    )]
     player: Option<PathBuf>,
 
     #[arg(
-        short,
+        short = 's',
         long,
-        help = "pause sound file path (default: 'sounds/ding.mp3')"
+        help = "'break sound' file path (default: '$XDG_CONFIG_HOME/tato/sounds/ding.mp3')"
     )]
-    pause_sound: Option<PathBuf>,
+    break_sound: Option<PathBuf>,
 
     #[arg(
-        short,
+        short = 'S',
         long,
-        help = "long pause sound file path (default: 'sounds/long_ding.mp3')"
+        help = "'long break sound' file path (default: '$XDG_CONFIG_HOME/tato/sounds/long_ding.mp3')"
     )]
-    long_pause_sound: Option<PathBuf>,
+    long_break_sound: Option<PathBuf>,
 }
 
 impl Args {
@@ -43,64 +52,71 @@ impl Args {
         Ok(Duration::from_secs(minutes * 60))
     }
 
-    pub fn session(&self) -> Duration {
-        self.session.unwrap()
+    pub fn block_duration(&self) -> Duration {
+        self.block_duration.unwrap()
     }
 
-    pub fn pause(&self) -> Duration {
-        self.pause.unwrap()
+    pub fn break_duration(&self) -> Duration {
+        self.break_duration.unwrap()
     }
 
-    pub fn round(&self) -> u32 {
-        self.round.unwrap()
+    pub fn iterations(&self) -> u32 {
+        self.iterations.unwrap()
     }
 
-    pub fn long_pause(&self) -> Duration {
-        self.long_pause.unwrap()
+    pub fn long_break_duration(&self) -> Duration {
+        self.long_break_duration.unwrap()
     }
 
     pub fn player(&self) -> &PathBuf {
         self.player.as_ref().unwrap()
     }
 
-    pub fn pause_sound(&self) -> &PathBuf {
-        self.pause_sound.as_ref().unwrap()
+    pub fn break_sound(&self) -> &PathBuf {
+        self.break_sound.as_ref().unwrap()
     }
-    pub fn long_pause_sound(&self) -> &PathBuf {
-        self.long_pause_sound.as_ref().unwrap()
+    pub fn long_break_sound(&self) -> &PathBuf {
+        self.long_break_sound.as_ref().unwrap()
     }
 }
 
 pub fn parse_args() -> Args {
-    let default_session: Option<Duration> = Some(Duration::from_secs(30 * 60));
-    let default_pause: Option<Duration> = Some(Duration::from_secs(5 * 60));
-    let default_round: Option<u32> = Some(4);
-    let default_long_pause: Option<Duration> = Some(Duration::from_secs(15 * 60));
+    let default_block_duration: Option<Duration> = Some(Duration::from_secs(30 * 60));
+    let default_break_duration: Option<Duration> = Some(Duration::from_secs(5 * 60));
+    let default_iterations: Option<u32> = Some(4);
+    let default_long_break_duration: Option<Duration> = Some(Duration::from_secs(15 * 60));
     let default_player: Option<PathBuf> = Some(PathBuf::from("mpv"));
-    let default_pause_sound = Some(PathBuf::from("sounds/ding.mp3"));
-    let default_long_pause_sound = Some(PathBuf::from("sounds/long_ding.mp3"));
+
+    let xdg_config_home = match env::var("XDG_CONFIG_HOME") {
+        Ok(var) => PathBuf::from(var),
+        Err(_) => PathBuf::from("~/.config"),
+    };
+
+    let default_break_sound = Some(xdg_config_home.join(PathBuf::from("tato/sounds/ding.mp3")));
+    let default_long_break_sound =
+        Some(xdg_config_home.join(PathBuf::from("tato/sounds/long_ding.mp3")));
 
     let mut args = Args::parse();
 
-    args.session = args.session.or(default_session);
-    args.pause = args.pause.or(default_pause);
-    args.round = args.round.or(default_round);
-    args.long_pause = args.long_pause.or(default_long_pause);
+    args.block_duration = args.block_duration.or(default_block_duration);
+    args.break_duration = args.break_duration.or(default_break_duration);
+    args.iterations = args.iterations.or(default_iterations);
+    args.long_break_duration = args.long_break_duration.or(default_long_break_duration);
     args.player = args.player.or(default_player).to_owned();
-    args.pause_sound = args.pause_sound.or(default_pause_sound).to_owned();
-    args.long_pause_sound = args
-        .long_pause_sound
-        .or(default_long_pause_sound)
+    args.break_sound = args.break_sound.or(default_break_sound).to_owned();
+    args.long_break_sound = args
+        .long_break_sound
+        .or(default_long_break_sound)
         .to_owned();
     args
 }
 
-pub fn play_pause_sound(args: &Args) {
-    let _ = Command::new(args.player()).arg(args.pause_sound()).spawn();
+pub fn play_break_sound(args: &Args) {
+    let _ = Command::new(args.player()).arg(args.break_sound()).spawn();
 }
 
-pub fn play_long_pause_sound(args: &Args) {
+pub fn play_long_break_sound(args: &Args) {
     let _ = Command::new(args.player())
-        .arg(&args.long_pause_sound())
+        .arg(&args.long_break_sound())
         .spawn();
 }
